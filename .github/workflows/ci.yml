@@ -5,30 +5,27 @@ on: [push, pull_request]
 jobs:
   defaults:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
-      - name: Set up JDK 11
+      - name: Set up JDK 11 and Gradle
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
   build:
+    needs: defaults
     steps:
-      - name: Set up gradle
-        uses: gradle/gradle-build-action@v2
       - name: Build app
         run: ./gradlew assemble
-#
-#  test:
-#      - name: Unit test
-#        run: ./gradlew testDebugUnitTest
-#
-#      - name: Android Test Report
-#        uses: asadmansr/android-test-report-action@v1.2.0
-#        if: ${{ always() }}
 
+  test:
+    needs: defaults
+    steps:
+      - name: Unit test
+        run: ./gradlew testDebugUnitTest
+      - name: Android Test Report
+        uses: asadmansr/android-test-report-action@v1.2.0
+        if: ${{ always() }}
